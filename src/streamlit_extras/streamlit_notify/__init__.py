@@ -10,9 +10,9 @@ from streamlit_notify.extras import (
     warning_stn,
     exception_stn,
     notify,
-    has_notifications,
-    clear_notifications,
     get_notifications,
+    get_notification_queue,
+    create_notification,
 )
 
 from .. import extra
@@ -26,9 +26,9 @@ error_stn = extra(error_stn)
 warning_stn = extra(warning_stn)
 exception_stn = extra(exception_stn)
 notify = extra(notify)
-has_notifications = extra(has_notifications)
-clear_notifications = extra(clear_notifications)
 get_notifications = extra(get_notifications)
+get_notification_queue = extra(get_notification_queue)
+create_notification = extra(create_notification)
 
 def example_notify_toast():
     import streamlit as st
@@ -62,7 +62,7 @@ def example_balloons():
 
 def example_snow():
     import streamlit as st
-    from streamlit_notify.extras import snow_stnm, notify
+    from streamlit_notify.extras import snow_stn, notify
 
     notify()
     
@@ -142,7 +142,7 @@ def example_notify():
     import streamlit as st
     from streamlit_notify.extras import notify, toast_stn, success_stn
 
-    notify(filter='toast') # Display only toast notifications
+    notify(element='toast') # Display only toast notifications
     
     # Queue multiple notifications then display them
     if st.button("Show Toast Notifications"):
@@ -157,64 +157,72 @@ def example_notify():
         success_stn("🎉 Success Notification 2", priority=4)
         st.rerun()
 
-
-
-def example_has_notifications():
+def example_get_notification_queue():
     import streamlit as st
-    from streamlit_notify.extras import has_notifications
-    
-    # has any notifications been queued?
-    if has_notifications():
-        st.write("🔔 Notifications are queued!")
+    from streamlit_notify.extras import get_notification_queue, notify
 
-    # check specifuic notification types
-    if has_notifications(filter='toast'):
-        st.write("🔔 Toast notifications are queued!")
+    # Get the notification queue for 'toast' notifications
+    toast_notification_queue = get_notification_queue('toast')
 
-def example_clear_notifications():
-    import streamlit as st
-    from streamlit_notify.extras import clear_notifications
+    """
+    The notification queue supports standard list operations:
 
-    # Clear all notifications
-    if st.button("Clear All Notifications"):
-        clear_notifications()
-        st.write("✅ All notifications cleared!")
+    append(item) - Add notification to queue
+    extend(items) - Add multiple notifications
+    pop(index) - Remove and return notification at index
+    get(index) - Get notification without removing it
+    remove(item) - Remove specific notification
+    clear() - Remove all notifications
+    has_items() - Check if queue has notifications
+    is_empty() - Check if queue is empty
+    contains(item) - Check if notification exists in queue
+    get_all() - Get all notifications
+    size() - Get number of notifications
+    """
 
-    # Clear specific notification types
-    if st.button("Clear Toast Notifications"):
-        clear_notifications(filter='toast')
-        st.write("✅ Toast notifications cleared!")
+    # Display the current size of the queue
+    st.write(f"Current Toast Notification Queue Size: {toast_notification_queue.size()}")
+
+    if st.button("Add Toast Notification"):
+        notify(element='toast', message="🔔 New Toast Notification", priority=3)
+        st.rerun()
 
 def example_get_notifications():
-    import streamlit as st    
-    from streamlit_notify.extras import get_notifications, toast_stn
+    import streamlit as st
+    from streamlit_notify.extras import get_notifications, toast_stn, success_stn
 
-    for notification_type, notifications in get_notifications(filter='toast').items():
-        st.write(f"🔔 {notification_type.capitalize()} Notifications:")
-        for notification in notifications:
+    toast_notifications = get_notifications('toast')
 
-            base_widget = notification.base_widget
-            widget_args = notification.args
-            priority = notification.priority
-            data = notification.data
+    print(len(toast_notifications))  # Print number of toast notifications in queue
 
-            st.write(f"Base Widget: {base_widget}")
-            st.write(f"Args: {widget_args}")
-            st.write(f"Data: {data}")
-            st.write(f"Priority: {priority}")
-
-            if notification.data == 'Hello World':
-                notification.notify()  # Display each notification
-
-    # Display toast notifications with different priorities and icons
-    if st.button("Show High Priority Toast"):
-        toast_stn("🎉 Welcome back!", icon="👋", priority=20, data='Hello World')
+    if st.button("Queue Notifications"):
+        toast_stn("🔔 Toast Notification", priority=3)
+        success_stn("✅ Success Notification", priority=5)
         st.rerun()
+
+def example_create_notification():
+    import streamlit as st
+    from streamlit_notify.extras import create_notification, get_notifications, notify
+
+    # notifications are automatically created when you use a stn function like toast_stn()
+    # but you can also create custom notifications directly with create_notification()
+    notify()
+
+    if st.button("Create Custom Notification"):
+        notification = create_notification(notification_type="toast",
+                                            message="🌟 Custom Toast Notification",
+                                            priority=4,
+                                            icon="⭐")
+
+        get_notifications('toast').append(notification)  # Manually add to toast queue
+
+
+
 
 __title__ = "Streamlit Notify"
 __desc__ = "A Streamlit component that provides status elements that persist across reruns." 
 __icon__ = "🔭"
-__examples__ = {
+__examples__ = { # type: ignore
     example_notify_toast: [toast_stn],
     example_balloons: [balloons_stn],
     example_snow: [snow_stn],
@@ -224,9 +232,9 @@ __examples__ = {
     example_warning: [warning_stn],
     example_exception: [exception_stn],
     example_notify: [notify],
-    example_has_notifications: [has_notifications],
-    example_clear_notifications: [clear_notifications],
+    example_get_notification_queue: [get_notification_queue],
     example_get_notifications: [get_notifications],
+    example_create_notification: [create_notification],
 }
 __author__ = "Patrick Garrett"
 __pypi_name__ = "streamlit-notify"
