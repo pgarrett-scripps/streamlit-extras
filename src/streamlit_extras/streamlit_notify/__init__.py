@@ -15,34 +15,20 @@ from streamlit_notify.extras import (
     create_notification,
 )
 
-from .. import extra
-
-toast_stn = extra(toast_stn)
-balloons_stn = extra(balloons_stn)
-snow_stn = extra(snow_stn)
-success_stn = extra(success_stn)
-info_stn = extra(info_stn)
-error_stn = extra(error_stn)
-warning_stn = extra(warning_stn)
-exception_stn = extra(exception_stn)
-notify = extra(notify)
-get_notifications = extra(get_notifications)
-get_notification_queue = extra(get_notification_queue)
-create_notification = extra(create_notification)
-
 
 def example_notify_toast():
     import streamlit as st
     from streamlit_notify.extras import toast_stn, notify
 
+    # Will display all queued notifications
     notify()
 
-    # Display toast notifications with different priorities and icons
+    # Show a basic toast notification
     if st.button("Show High Priority Toast"):
         toast_stn("🎉 Welcome back!", icon="👋")
         st.rerun()
 
-    # can also set priority and data
+    # Show a toast with priority and extra data
     if st.button("Show Medium Priority Toast"):
         toast_stn(
             "🔔 Reminder: Meeting at 3 PM",
@@ -58,7 +44,7 @@ def example_balloons():
 
     notify()
 
-    # Display balloons with celebration context
+    # Display balloons
     if st.button("🎊 Celebrate Achievement"):
         balloons_stn()
         st.rerun()
@@ -70,7 +56,7 @@ def example_snow():
 
     notify()
 
-    # Display snow with seasonal context
+    # Display snow
     if st.button("❄️ Winter Theme"):
         snow_stn()
         st.rerun()
@@ -82,7 +68,7 @@ def example_success():
 
     notify()
 
-    # Display success messages for different operations
+    # Display success messages
     if st.button("💾 Save Data"):
         success_stn("Data saved successfully!")
         st.rerun()
@@ -94,7 +80,7 @@ def example_info():
 
     notify()
 
-    # Display info messages with helpful context
+    # Display info messages
     if st.button("📊 Data Update"):
         info_stn("New data available for analysis")
         st.rerun()
@@ -102,9 +88,11 @@ def example_info():
 
 def example_error():
     import streamlit as st
-    from streamlit_notify.extras import error_stn
+    from streamlit_notify.extras import error_stn, notify
 
-    # Display error messages with troubleshooting info
+    notify()
+
+    # Display error messages
     if st.button("❌ Data Load Error"):
         error_stn("Failed to load data from source")
         st.rerun()
@@ -116,9 +104,9 @@ def example_warning():
 
     notify()
 
-    # Display warnings with actionable information
+    # Display warnings
     if st.button("⚠️ Storage Warning"):
-        warning_stn("Storage space running low (85% full)")
+        warning_stn("Storage space running low")
         st.rerun()
 
 
@@ -128,21 +116,12 @@ def example_exception():
 
     notify()
 
-    # Display exception notifications with debug info
+    # Display exception notifications
     if st.button("🐛 Processing Error"):
         try:
-            raise ValueError("Invalid input: expected number, got string")
+            raise ValueError("Invalid input")
         except ValueError as e:
             exception_stn(e)
-            st.rerun()
-
-    if st.button("⚡ Timeout Error"):
-        try:
-            raise TimeoutError("API request timed out after 30 seconds")
-        except TimeoutError as e:
-            exception_stn(
-                e, priority=8, data={"endpoint": "/api/data", "timeout": "30s"}
-            )
             st.rerun()
 
 
@@ -150,16 +129,17 @@ def example_notify():
     import streamlit as st
     from streamlit_notify.extras import notify, toast_stn, success_stn
 
-    notify(element="toast")  # Display only toast notifications
+    # Show only toast notifications
+    notify(element="toast")
 
-    # Queue multiple notifications then display them
+    # Queue toast and success notifications
     if st.button("Show Toast Notifications"):
         toast_stn("🔔 Notification 1", priority=3)
         toast_stn("🔔 Notification 2", priority=5)
         success_stn("✅ Success Notification", priority=7)
         st.rerun()
 
-    # will not be displayed because we filtered for 'toast'
+    # These will not show because only 'toast' notifications are displayed
     if st.button("Show Success Notifications"):
         success_stn("🎉 Success Notification 1", priority=2)
         success_stn("🎉 Success Notification 2", priority=4)
@@ -170,7 +150,7 @@ def example_get_notification_queue():
     import streamlit as st
     from streamlit_notify.extras import get_notification_queue, notify
 
-    # Get the notification queue for 'toast' notifications directly
+    # Get the toast notification queue
     toast_notification_queue = get_notification_queue("toast")
 
     """
@@ -191,9 +171,7 @@ def example_get_notification_queue():
     """
 
     # Display the current size of the queue
-    st.write(
-        f"Current Toast Notification Queue Size: {toast_notification_queue.size()}"
-    )
+    st.write(f"Queue Size: {len(toast_notification_queue)}")
 
     if st.button("Add Toast Notification"):
         notify(element="toast", message="🔔 New Toast Notification", priority=3)
@@ -204,7 +182,13 @@ def example_get_notifications():
     import streamlit as st
     from streamlit_notify.extras import get_notifications, toast_stn, success_stn
 
+    # Get all toast notifications
     toast_notifications = get_notifications("toast")
+
+    toast_and_success_notifications = get_notifications(["toast", "success"])
+
+    # Get all notifications of all types
+    all_notifications = get_notifications()
 
     for notification in toast_notifications:
 
@@ -239,7 +223,7 @@ def example_create_notification():
     import streamlit as st
     from streamlit_notify.extras import create_notification, get_notifications, notify
 
-    # notifications are automatically created when you use a stn function like toast_stn()
+    # Notifications are automatically created when you use an stn function like toast_stn(),
     # but you can also create custom notifications directly with create_notification()
     notify()
 
@@ -251,12 +235,28 @@ def example_create_notification():
             icon="⭐",
         )
 
-        get_notifications("toast").append(notification)  # Manually add to toast queue
+        # Manually add a custom notification to the queue
+        get_notifications("toast").append(notification)
 
+
+from .. import extra
+
+toast_stn = extra(toast_stn)
+balloons_stn = extra(balloons_stn)
+snow_stn = extra(snow_stn)
+success_stn = extra(success_stn)
+info_stn = extra(info_stn)
+error_stn = extra(error_stn)
+warning_stn = extra(warning_stn)
+exception_stn = extra(exception_stn)
+notify = extra(notify)
+get_notifications = extra(get_notifications)
+get_notification_queue = extra(get_notification_queue)
+create_notification = extra(create_notification)
 
 __title__ = "Streamlit Notify"
 __desc__ = (
-    "A Streamlit component that provides status elements that persist across reruns."
+    "Queue and display Streamlit Status Elements like toasts, balloons, and snowflakes."
 )
 __icon__ = "🔭"
 __examples__ = {  # type: ignore
