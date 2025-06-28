@@ -258,7 +258,7 @@ __title__ = "Streamlit Notify"
 __desc__ = (
     "Queue and display Streamlit Status Elements like toasts, balloons, and snowflakes."
 )
-__icon__ = "🔭"
+__icon__ = "🔔"
 __examples__ = {  # type: ignore
     example_notify_toast: [toast_stn],
     example_balloons: [balloons_stn],
